@@ -1095,9 +1095,8 @@ function utility.rgba(r, g, b, alpha)
 end
 
 local themes = {
-
-    Default = {
-        ["Accent"] = Color3.fromRGB(0,0,0),
+    Midnight = {
+        ["Accent"] = Color3.fromRGB(0, 0, 0),
         ["Window Background"] = Color3.fromRGB(30, 30, 36),
         ["Window Border"] = Color3.fromRGB(45, 45, 49),
         ["Tab Background"] = Color3.fromRGB(20, 20, 24),
@@ -1110,7 +1109,6 @@ local themes = {
         ["Object Background"] = Color3.fromRGB(25, 25, 29),
         ["Object Border"] = Color3.fromRGB(35, 35, 39),
         ["Dropdown Option Background"] = Color3.fromRGB(19, 19, 23)
-
     }
 }
 
