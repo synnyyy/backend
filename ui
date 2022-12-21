@@ -1096,7 +1096,7 @@ end
 
 local themes = {
 
-    Midnight = {
+    Default = {
         ["Accent"] = Color3.fromRGB(0,0,0),
         ["Window Background"] = Color3.fromRGB(30, 30, 36),
         ["Window Border"] = Color3.fromRGB(45, 45, 49),
