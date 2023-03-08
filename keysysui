@@ -771,6 +771,8 @@ function library:Introduction()
     hashLogo.Size = UDim2.new(0, 150, 0, 150)
     hashLogo.Visible = true
     hashLogo.Image = "http://www.roblox.com/asset/?id=12627262720"
+    xsxLogo.ImageTransparency = 1
+
     
     xsx.Name = "xsx"
     xsx.Parent = background
@@ -790,7 +792,7 @@ function library:Introduction()
     text.Position = UDim2.new(0.912751675, 0, 0, 0)
     text.Size = UDim2.new(0, 26, 0, 21)
     text.Font = Enum.Font.Code
-    text.Text = ""
+    text.Text = "syn"
     text.TextColor3 = Color3.fromRGB(124, 124, 124)
     text.TextSize = 10.000
     text.TextTransparency = 1
