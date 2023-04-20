@@ -1096,7 +1096,7 @@ end
 
 local themes = {
     Default = {
-        ["Accent"] = Color3.fromRGB(119, 9, 178),
+        ["Accent"] = Color3.fromRGB(142,156,190),
         ["Window Background"] = Color3.fromRGB(30, 30, 30),
         ["Window Border"] = Color3.fromRGB(45, 45, 45),
         ["Tab Background"] = Color3.fromRGB(20, 20, 20),
@@ -1112,7 +1112,7 @@ local themes = {
     },
 
     Midnight = {
-        ["Accent"] = Color3.fromRGB(119, 9, 178),
+        ["Accent"] = Color3.fromRGB(142,156,190),
         ["Window Background"] = Color3.fromRGB(30, 30, 36),
         ["Window Border"] = Color3.fromRGB(45, 45, 49),
         ["Tab Background"] = Color3.fromRGB(20, 20, 24),
