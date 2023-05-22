@@ -1,0 +1,65 @@
+-- This is already open sourced.
+
+local OldCoreTypeSettings = {}
+		local WhitelistedCoreTypes = {
+			"Chat",
+			"All",
+			Enum.CoreGuiType.Chat,
+			Enum.CoreGuiType.All
+		}
+
+		local OldCoreSetting = nil
+
+		local CoreGui = game:GetService("CoreGui")
+		local StarterGui = game:GetService("StarterGui")
+		local TextChatService = game:GetService("TextChatService")
+		local Players = game:GetService("Players")
+
+		local Player = Players.LocalPlayer
+
+		local PlayerGui = Player:FindFirstChildWhichIsA("PlayerGui") do
+			if not PlayerGui then
+				repeat task.wait() until Player:FindFirstChildWhichIsA("PlayerGui")
+				PlayerGui = Player:FindFirstChildWhichIsA("PlayerGui")
+			end
+		end
+
+
+		local Metatable = getrawmetatable(StarterGui)
+		setreadonly(Metatable, false)
+
+	
+
+
+		if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+			return warn("Warning: ACL will not work.")
+		end
+
+		local PlayerScripts = Player:WaitForChild("PlayerScripts")
+		local ChatMain = PlayerScripts:FindFirstChild("ChatMain", true) or false
+
+		if not ChatMain then
+			local Timer = tick()
+			
+			repeat task.wait() until PlayerScripts:FindFirstChild("ChatMain", true) or tick() > (Timer + 3)
+			ChatMain = PlayerScripts:FindFirstChild("ChatMain", true)
+			
+			if not ChatMain then
+				return warn("Warning: ACL will not work.")
+			end
+		end
+
+		local PostMessage = require(ChatMain).MessagePosted
+
+		if not PostMessage then
+			return warn("Warning: ACL will not work.")
+		end
+
+		local MessageEvent = Instance.new("BindableEvent")
+		local OldFunctionHook; OldFunctionHook = hookfunction(PostMessage.fire, function(self, Message)
+			if not checkcaller() and self == PostMessage then
+				MessageEvent:Fire(Message)
+				return
+			end
+			return OldFunctionHook(self, Message)
+		end)
