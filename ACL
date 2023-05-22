@@ -1,65 +1,150 @@
--- This is already open sourced.
+-- This basically makes roblox unable to log your chat messages sent in-game. Meaning if you get reported for saying something bad, you won't get banned!
+-- Store the loadstring (line 5) in your autoexec folder into a text/lua file to receive automatic updates [remove the "--"" part when you paste it into the text file]
+-- Credits: AnthonyIsntHere
+
+-- loadstring(game:HttpGet("https://raw.githubusercontent.com/AnthonyIsntHere/anthonysrepository/main/scripts/AntiChatLogger.lua", true))()
+
+-- 4/1/2023 - Rewritten
+-- 4/4/2023 - Fixed scrollbar visibility issue
+-- 4/15/2023 - Fixed Adonis anti-cheat kicking issue (replaced line 320 with setmetatable)
+-- 4/26/2023 - Fixed tick loaded format
+-- 4/28/2023 - Added support for Fluxus users (no hookmetamethod lol)
+
+if not game:IsLoaded() then
+    game.Loaded:wait()
+end
+
+local ACL_LoadTime = tick()
 
 local OldCoreTypeSettings = {}
-		local WhitelistedCoreTypes = {
-			"Chat",
-			"All",
-			Enum.CoreGuiType.Chat,
-			Enum.CoreGuiType.All
-		}
+local WhitelistedCoreTypes = {
+    "Chat",
+    "All",
+    Enum.CoreGuiType.Chat,
+    Enum.CoreGuiType.All
+}
 
-		local OldCoreSetting = nil
+local OldCoreSetting = nil
 
-		local CoreGui = game:GetService("CoreGui")
-		local StarterGui = game:GetService("StarterGui")
-		local TextChatService = game:GetService("TextChatService")
-		local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+local StarterGui = game:GetService("StarterGui")
+local TweenService = game:GetService("TweenService")
+local TextChatService = game:GetService("TextChatService")
+local Players = game:GetService("Players")
 
-		local Player = Players.LocalPlayer
+local Player = Players.LocalPlayer
 
-		local PlayerGui = Player:FindFirstChildWhichIsA("PlayerGui") do
-			if not PlayerGui then
-				repeat task.wait() until Player:FindFirstChildWhichIsA("PlayerGui")
-				PlayerGui = Player:FindFirstChildWhichIsA("PlayerGui")
-			end
-		end
+local PlayerGui = Player:FindFirstChildWhichIsA("PlayerGui") do
+    if not PlayerGui then
+        repeat task.wait() until Player:FindFirstChildWhichIsA("PlayerGui")
+        PlayerGui = Player:FindFirstChildWhichIsA("PlayerGui")
+    end
+end
+
+local Notify = function(_Title, _Text , Time)
+    StarterGui:SetCore("SendNotification", {Title = _Title, Text = _Text, Icon = "rbxassetid://2541869220", Duration = Time})
+end
+
+local Tween = function(Object, Time, Style, Direction, Property)
+	return TweenService:Create(Object, TweenInfo.new(Time, Enum.EasingStyle[Style], Enum.EasingDirection[Direction]), Property)
+end
+
+local Metatable = getrawmetatable(StarterGui)
+setreadonly(Metatable, false)
+
+local CoreHook do
+    if hookmetamethod then
+        CoreHook = hookmetamethod(StarterGui, "__namecall", newcclosure(function(self, ...)
+            local Method = getnamecallmethod()
+            local Arguments = {...}
+            
+            if self == StarterGui and not checkcaller() then
+                if Method == "SetCoreGuiEnabled" then
+                    local CoreType = Arguments[1]
+                    local Enabled = Arguments[2]
+                    
+                    if table.find(WhitelistedCoreTypes, CoreType) and not Enabled then
+                        OldCoreTypeSettings[CoreType] = Enabled
+                        return
+                    end
+                elseif Method == "SetCore" then
+                    local Core = Arguments[1]
+                    local Connection = Arguments[2]
+                    
+                    if Core == "CoreGuiChatConnections" then
+                        OldCoreSetting = Connection
+                        return
+                    end
+                end
+            end
+            
+            return CoreHook(self, ...)
+        end))
+    end
+end
+
+local EnabledChat = task.spawn(function()
+    repeat
+        StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, true)
+        task.wait()
+    until StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType.Chat)
+end)
 
 
-		local Metatable = getrawmetatable(StarterGui)
-		setreadonly(Metatable, false)
 
-	
+if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+    return warn("ACL will not work here.")
+end
+
+local PlayerScripts = Player:WaitForChild("PlayerScripts")
+local ChatMain = PlayerScripts:FindFirstChild("ChatMain", true) or false
+
+if not ChatMain then
+    local Timer = tick()
+    
+    repeat task.wait() until PlayerScripts:FindFirstChild("ChatMain", true) or tick() > (Timer + 3)
+    ChatMain = PlayerScripts:FindFirstChild("ChatMain", true)
+    
+    if not ChatMain then
+    	return warn("ACL will not work here.")
+    end
+end
+
+local PostMessage = require(ChatMain).MessagePosted
+
+if not PostMessage then
+    return warn("ACL will not work here.")
+end
+
+local MessageEvent = Instance.new("BindableEvent")
+local OldFunctionHook; OldFunctionHook = hookfunction(PostMessage.fire, function(self, Message)
+    if not checkcaller() and self == PostMessage then
+        MessageEvent:Fire(Message)
+        return
+    end
+    return OldFunctionHook(self, Message)
+end)
 
 
-		if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
-			return warn("Warning: ACL will not work.")
-		end
+for _, x in next, OldCoreTypeSettings do
+    if not x then
+        StarterGui:SetCore("ChatActive", false)
+    end
+    StarterGui:SetCoreGuiEnabled(_, x)
+end
 
-		local PlayerScripts = Player:WaitForChild("PlayerScripts")
-		local ChatMain = PlayerScripts:FindFirstChild("ChatMain", true) or false
+if OldCoreSetting then
+    StarterGui:SetCore("CoreGuiChatConnections", OldCoreSetting)
+end
 
-		if not ChatMain then
-			local Timer = tick()
-			
-			repeat task.wait() until PlayerScripts:FindFirstChild("ChatMain", true) or tick() > (Timer + 3)
-			ChatMain = PlayerScripts:FindFirstChild("ChatMain", true)
-			
-			if not ChatMain then
-				return warn("Warning: ACL will not work.")
-			end
-		end
+if StarterGui:GetCore("ChatActive") then
+    StarterGui:SetCore("ChatActive", false)
+    StarterGui:SetCore("ChatActive", true)
+end
 
-		local PostMessage = require(ChatMain).MessagePosted
+--Metatable.__namecall = CoreHook
+if CoreHook then
+    setmetatable(Metatable, {__namecall = CoreHook}) 
+end
+setreadonly(Metatable, true)
 
-		if not PostMessage then
-			return warn("Warning: ACL will not work.")
-		end
-
-		local MessageEvent = Instance.new("BindableEvent")
-		local OldFunctionHook; OldFunctionHook = hookfunction(PostMessage.fire, function(self, Message)
-			if not checkcaller() and self == PostMessage then
-				MessageEvent:Fire(Message)
-				return
-			end
-			return OldFunctionHook(self, Message)
-		end)
