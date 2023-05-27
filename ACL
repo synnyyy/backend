@@ -1,8 +1,9 @@
-local CheckCaller = clonefunction(checkcaller)
-local HookFunction = clonefunction(hookfunction)
-local player = game:GetService("Players").LocalPlayer
+local CloneFunction = clonefunction
+local CheckCaller = CloneFunction(checkcaller)
+local HookFunction = CloneFunction(hookfunction)
+local LocalPlayer = game.Players.PlayerAdded:wait()
 
-local PostMessage = require(player:WaitForChild("PlayerScripts", 1/0):WaitForChild("ChatScript", 1/0):WaitForChild("ChatMain", 1/0)).MessagePosted
+local PostMessage = require(LocalPlayer:WaitForChild("PlayerScripts", 1/0):WaitForChild("ChatScript", 1/0):WaitForChild("ChatMain", 1/0)).MessagePosted
 getgenv().MessageEvent = Instance.new("BindableEvent")
 
 local OldFunctionHook
