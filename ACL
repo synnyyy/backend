@@ -1,3 +1,8 @@
+local TextChatService = game:GetService("TextChatService")
+if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+    return warn("Not suitable.")
+end
+
 local CloneFunction = clonefunction
 local CheckCaller = CloneFunction(checkcaller)
 local HookFunction = CloneFunction(hookfunction)
